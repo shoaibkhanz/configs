@@ -14,3 +14,5 @@ alias zs="nv ~/.zshrc"
 alias python="python3"
 alias lz="lazygit"
 alias cls="clear"
+alias eng="cd ~/engineering"
+alias py=python3

@@ -1,7 +1,7 @@
 # Git aliases
 if [[ -x "$(command -v git)" ]]; then
   # Basic git commands
-  alias gi='git init'          # Alias for 'git'
+  alias g='git'                # Alias for 'git'
   alias ga='git add'           # Alias for 'git add' (stage changes)
   alias gc='git commit'        # Alias for 'git commit' (commit changes)
   alias gcm='git commit -m'    # Alias for 'git commit -m' (commit changes with a message)
