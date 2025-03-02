@@ -1,25 +1,31 @@
-font-family = GiestMono NF 
+font-family = JetBrainsMono
+#font-family = GiestMono NF 
 # font-family = BerkeleyMono Nerd Font
 #font-family = Iosevka Nerd Font
 # font-family = SFMono Nerd Font 
 font-size = 16
-theme = catppuccin-mocha 
+theme = catppuccin-mocha
 shell-integration-features = no-cursor,sudo,no-title
 cursor-style = block
 adjust-cell-height = 15%
-# background-opacity = 0.96
+# background-opacity = 0.56
 
 mouse-hide-while-typing = true
 mouse-scroll-multiplier = 1
 
 window-padding-balance = true 
 window-save-state = always
-macos-titlebar-style=transparent
-window-colorspace = "display-p3"
-background = 1C2021
-# foreground = d4be98
+macos-titlebar-style = transparent
+# window-colorspace = "display-p3"
+# background = 1C2021
+window-theme = system
+window-subtitle = false
+title = " "
+
+
 
 # keybindings
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
 keybind = cmd+s>r=reload_config
 keybind = cmd+s>x=close_surface
 
