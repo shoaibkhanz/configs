@@ -20,10 +20,24 @@ alias lz="lazygit"
 alias ad="awsume datascience"
 
 # k8s shortcuts
+alias kubectl="kubecolor"
 alias k="kubectl"
 alias eks="eksctl"
-alias kns="kubectl get ns"
-alias kga="kubectl get all -n $1"
+alias kns="kubecolor get ns"
+alias kga="kubecolor  get all -n $1"
+alias kp="kubecolor get po"
+alias hp="export HEAD_POD=$(kubectl get pods --selector=ray.io/node-type=head -o custom-columns=POD:metadata.name --no-headers)"
+alias kpo="kubectl port-forward $HEAD_POD $1"
+# This needs to be added before "compdef kubecolor=kubectl"
+source <(kubectl completion zsh)
+# Make "kubecolor" borrow the same completion logic as "kubectl"
+compdef kubecolor=kubectl
+
+
+# docker
+alias db="docker build"
+alias dr="docker run"
+alias dp="docker push"
 
 alias ls='eza --long --git -a --header --group'     # Alias for 'eza' command with options for long listing, git status, all files, header, and grouping
 alias tree='eza --tree --level=2 --long -a --header --git' # Alias for 'eza' command with options for showing a tree view, limited to 2 levels, long listing, all files, header, and git status
