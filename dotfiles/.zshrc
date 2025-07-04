@@ -16,6 +16,7 @@ alias src="source ~/.zshrc"
 alias pr="poetry run $1"
 alias prn="poetry run nvim"
 alias lz="lazygit"
+alias bu="brew upgrade"
 
 alias ad="awsume datascience"
 
@@ -26,7 +27,7 @@ alias eks="eksctl"
 alias kns="kubecolor get ns"
 alias kga="kubecolor  get all -n $1"
 alias kp="kubecolor get po"
-alias hp="export HEAD_POD=$(kubectl get pods --selector=ray.io/node-type=head -o custom-columns=POD:metadata.name --no-headers)"
+# alias hp="export HEAD_POD=$(kubectl get pods --selector=ray.io/node-type=head -o custom-columns=POD:metadata.name --no-headers)"
 alias kpo="kubectl port-forward $HEAD_POD $1"
 # This needs to be added before "compdef kubecolor=kubectl"
 source <(kubectl completion zsh)
@@ -156,18 +157,6 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 zinit cdreplay -q
 
 
-# Pure Settings
-# fpath+=($HOME/.zsh/pure)
-# autoload -U promptinit; promptinit
-# # optionally define some options
-# PURE_CMD_MAX_EXEC_TIME=10
-# # change the path color
-# zstyle :prompt:pure:path color white
-# # change the color for both `prompt:success` and `prompt:error`
-# zstyle ':prompt:pure:prompt:*' color cyan
-# # turn on git stash status
-# zstyle :prompt:pure:git:stash show yes
-# prompt pure
 
 # Git aliases
 if [[ -x "$(command -v git)" ]]; then
