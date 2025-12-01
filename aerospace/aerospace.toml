@@ -9,7 +9,15 @@ after-login-command = []
 # You can use it to add commands that run after AeroSpace startup.
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
-after-startup-command = []
+after-startup-command = [
+    'exec-and-forget sketchybar',
+    'exec-and-forget borders active_color=0xffffffff inactive_color=0x00000000 width=4.0'
+]
+
+# Notify sketchybar when workspace changes
+exec-on-workspace-change = ['/bin/bash', '-c',
+  '/Users/shoaib.khan/.config/sketchybar/plugins/aerospace.sh'
+]
 
 # Start AeroSpace at login
 start-at-login = true
@@ -61,7 +69,7 @@ inner.horizontal = 5
 inner.vertical =   5
 outer.left =       5
 outer.bottom =     5
-outer.top =        5
+outer.top =        40
 outer.right =      5
 
 # 'main' binding mode declaration
@@ -113,6 +121,9 @@ alt-shift-l = 'move right'
 # See: https://nikitabobko.github.io/AeroSpace/commands#resize
 alt-shift-minus = 'resize smart -50'
 alt-shift-equal = 'resize smart +50'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#fullscreen
+alt-f = 'fullscreen'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
 alt-w = 'workspace W' # work
