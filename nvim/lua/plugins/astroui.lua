@@ -1,5 +1,3 @@
-if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
-
 -- AstroUI provides the basis for configuring the AstroNvim User Interface
 -- Configuration documentation can be found with `:h astroui`
 -- NOTE: We highly recommend setting up the Lua Language Server (`:LspInstall lua_ls`)
@@ -11,11 +9,16 @@ return {
   ---@type AstroUIOpts
   opts = {
     -- change colorscheme
-    -- colorscheme = "astrodark",
+    colorscheme = "astrodark",
     -- AstroUI allows you to easily modify highlight groups easily for any and all colorschemes
     highlights = {
       init = { -- this table overrides highlights in all themes
-        -- Normal = { bg = "#000000" },
+        -- Markdown inline code (backticks) styling for yugen theme
+        -- Maximum contrast: bright text on darker background
+        RenderMarkdownCode = { fg = "#FAFAFA", bg = "#151515" },
+        RenderMarkdownCodeInline = { fg = "#FAFAFA", bg = "#151515" },
+        ["@markup.raw"] = { fg = "#FAFAFA", bg = "#151515" },
+        ["@text.literal"] = { fg = "#FAFAFA", bg = "#151515" },
       },
       astrodark = { -- a table of overrides/changes when applying the astrotheme theme
         -- Normal = { bg = "#000000" },

@@ -81,6 +81,9 @@ return {
         
         -- Disable the default <leader>n new file mapping to avoid conflicts with neotest
         ["<Leader>n"] = false,
+        -- Add full git blame mapping
+        ["<Leader>gb"] = {function() require("gitsigns").blame() end,
+        desc = "Git Blame (full)"}
       },
     },
   },

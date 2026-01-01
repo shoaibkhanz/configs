@@ -5,7 +5,7 @@
   "share": "disabled",
 
   // Custom instructions: Load project-specific guidelines
-  "instructions": ["CONTRIBUTING.md", "README.md"],
+  // "instructions": ["CONTRIBUTING.md", "README.md"],
 
   // Keybinds: Vim-style navigation for scrolling chat
   "keybinds": {
@@ -26,5 +26,57 @@
   },
 
   // Disabled providers: Prevent using opencode provider
-  // "disabled_providers": ["opencode"]
+  "disabled_providers": ["opencode"],
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "qwen2.5-coder:7b": {
+          "name": "qwen2.5-coder:7b"
+        }
+      }
+    }
+  },
+
+ // Obsidian Agent: British English, focused tools
+  "agent": {
+    "obsidian": {
+      "mode": "primary",
+      "description": "Obsidian vault assistant for daily notes, research, and blog writing",
+      "prompt": "{file:./prompts/obsidian-context.txt}",
+      "temperature": 0.3,
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "grep": true,
+        "glob": true,
+        "bash": false,
+        "skill": true
+      },
+      "permission": {
+        "edit": "allow",
+        "skill": {
+          "today-note": "allow",
+          "task-review": "allow",
+          "research-note": "allow",
+          "blog-draft": "allow"
+        }
+      }
+    }
+  },
+
+  // Skill Permissions
+  "permission": {
+    "skill": {
+      "today-note": "allow",
+      "task-review": "allow",
+      "research-note": "allow",
+      "blog-draft": "allow"
+    }
+  }
 }
