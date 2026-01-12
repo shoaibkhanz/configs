@@ -3,7 +3,7 @@
 
   // Privacy: Disable sharing sessions
   "share": "disabled",
-
+  "plugin": ["@plannotator/opencode@latest"],
   // Custom instructions: Load project-specific guidelines
   // "instructions": ["CONTRIBUTING.md", "README.md"],
 
@@ -23,6 +23,15 @@
     "scroll_acceleration": {
       "enabled": true
     }
+  },
+
+  "mcp":{
+"context7": {
+  "type": "remote",
+  "enabled": true,
+  "url": "https://mcp.context7.com/mcp"
+}
+
   },
 
   // Disabled providers: Prevent using opencode provider
