@@ -1,210 +1,332 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
+# ============================================================================
+# ZSHRC Configuration
+# ============================================================================
+# This file is loaded for interactive shells. It configures the shell
+# environment, aliases, functions, completions, and plugins.
+#
+# Structure:
+#   1. Instant Prompt (Powerlevel10k) - must be first
+#   2. Completion System Initialisation
+#   3. Environment Variables & PATH
+#   4. Aliases & Functions
+#   5. Tool Initialisations (zoxide, fzf, brew)
+#   6. Plugin Manager (Zinit) & Plugins
+#   7. Shell Options (history, keybindings, completion styling)
+#   8. External Tool Integrations
+# ============================================================================
+
+
+# ============================================================================
+# 1. POWERLEVEL10K INSTANT PROMPT
+# ============================================================================
+# Enable instant prompt for faster shell startup. This caches the prompt
+# so it appears immediately while the rest of zshrc loads in the background.
+# IMPORTANT: Must stay at the top. Any code requiring user input (passwords,
+# confirmations) must go ABOVE this block.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+
+# ============================================================================
+# 2. COMPLETION SYSTEM
+# ============================================================================
+# Note: compinit is called AFTER fpath is fully populated (see section 6)
+# This ensures all completion directories are available.
+autoload -Uz compinit
+
+
+# ============================================================================
+# 3. ENVIRONMENT VARIABLES & PATH
+# ============================================================================
+# XDG Base Directory specification
+export XDG_CONFIG_HOME="$HOME/.config"
+
+# Consolidated PATH exports
+# typeset -U ensures unique entries (no duplicates)
+# Note: Homebrew paths are added via `brew shellenv` in section 5
+typeset -U path
+path=(
+  "$HOME/.local/bin"           # User-installed binaries (pipx, etc.)
+  "$HOME/.config/nvim"         # Neovim config scripts
+  "$HOME/.cargo/bin"           # Rust/Cargo binaries
+  "$HOME/go/bin"               # Go binaries
+  "$HOME/.modular/bin"         # Modular/Mojo binaries
+  "$HOME/.antigravity/antigravity/bin"  # Antigravity tool
+  $path
+)
+
+# Library paths for compilation (needed for mkdocs-material image processing)
+# Source: https://squidfunk.github.io/mkdocs-material/plugins/requirements/image-processing/
+export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_FALLBACK_LIBRARY_PATH"
+export LDFLAGS="-L/opt/homebrew/opt/zlib/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/zlib/include"
+
+# Default editors
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# API Keys - loaded from separate file for security
+# Edit secrets with: nvim ~/.secrets
+[[ -f ~/.secrets ]] && source ~/.secrets
+
+
+# ============================================================================
+# 4. ALIASES & FUNCTIONS
+# ============================================================================
+
+# --- General Shortcuts ---
 alias cls="clear"
 alias python="python3"
-alias cda="conda activate $1"
-alias cde="conda deactivate"
-alias zrc="nvim ~/.zshrc"
-alias nv="nvim ~/.config"
-alias sshnv="nvim ~/.ssh"
-alias src="source ~/.zshrc"
-alias pr="poetry run $1"
-alias prn="poetry run nvim"
-alias lz="lazygit"
 
-alias ad="awsume datascience"
+# --- Config File Shortcuts ---
+alias zrc="nvim ~/.zshrc"      # Edit this file
+alias src="source ~/.zshrc"    # Reload this file
+alias sec="nvim ~/.secrets"    # Edit secrets file
+alias nv="nvim ~/.config/nvim" # Edit Neovim config
+alias sshnv="nvim ~/.ssh"      # Edit SSH config
+alias vi="nvim"                # Use Neovim as vi
 
-# k8s shortcuts
-alias kubectl="kubecolor"
-alias k="kubectl"
-alias eks="eksctl"
-alias kns="kubecolor get ns"
-alias kga="kubecolor  get all -n $1"
-alias kp="kubecolor get po"
-alias hp="export HEAD_POD=$(kubectl get pods --selector=ray.io/node-type=head -o custom-columns=POD:metadata.name --no-headers)"
-alias kpo="kubectl port-forward $HEAD_POD $1"
-# This needs to be added before "compdef kubecolor=kubectl"
-source <(kubectl completion zsh)
-# Make "kubecolor" borrow the same completion logic as "kubectl"
-compdef kubecolor=kubectl
+# --- Development Tools ---
+alias lz="lazygit"             # Terminal UI for git
+alias op="opencode"            # OpenCode AI assistant
+alias cl="claude"              # Claude CLI
+alias cld="claude --dangerously-skip-permissions"  # Claude without permission prompts
 
+# --- Python/UV (fast Python package manager) ---
+ur() { uv run "$@"; }          # Run Python scripts with uv
+alias urn="uv run nvim"        # Run Neovim through uv
 
-# docker
+# --- AWS ---
+alias ad="awsume datascience"  # Assume AWS datascience role
+
+# --- Kubernetes (k8s) ---
+# Lazy-load kubectl completions to prevent shell hang when cluster is unreachable.
+# Completions are loaded on first use of kubectl/kubecolor/k commands.
+# Unalias any conflicting aliases (e.g., from previous shell state or plugins)
+unalias kt kga 2>/dev/null
+_kubectl_lazy_init() {
+  unfunction _kubectl_lazy_init kubectl kubecolor kt 2>/dev/null
+  source <(command kubectl completion zsh)
+  compdef kubecolor=kubectl
+  alias kt='kubecolor'  # Persist kt after lazy-load completes
+}
+kubectl() { _kubectl_lazy_init; command kubecolor "$@"; }
+kubecolor() { _kubectl_lazy_init; command kubecolor "$@"; }
+kt() { _kubectl_lazy_init; command kubecolor "$@"; }
+
+alias eks="eksctl"                    # EKS cluster management
+alias kns="kubecolor get ns"          # List namespaces
+alias kp="kubecolor get po"           # List pods
+kga() { kubecolor get all -n "$1"; }  # Get all resources in namespace
+
+# Ray cluster helpers (for ML workloads)
+hp() { export HEAD_POD=$(command kubectl get pods --selector=ray.io/node-type=head -o custom-columns=POD:metadata.name --no-headers); }
+kpo() { command kubectl port-forward "$HEAD_POD" "$@"; }
+
+# --- Docker ---
 alias db="docker build"
 alias dr="docker run"
 alias dp="docker push"
 
-alias ls='eza --long --git -a --header --group'     # Alias for 'eza' command with options for long listing, git status, all files, header, and grouping
-alias tree='eza --tree --level=2 --long -a --header --git' # Alias for 'eza' command with options for showing a tree view, limited to 2 levels, long listing, all files, header, and git status
+# --- File Listing (eza - modern ls replacement) ---
+alias ls='eza --long --git -a --header --group'
+alias tree='eza --tree --level=2 --long -a --header --git'
+alias ll='eza --long --git --header --group --time-style=long-iso'
+alias la='eza --long --git --all --header --group --time-style=long-iso'
+alias l.='eza --long --git --header --group --time-style=long-iso .'
+alias lsr='eza --long --git --header --group --time-style=long-iso --recurse'
 
-# More aliases using eza
-alias ll='eza --long --git --header --group --time-style=long-iso'  # Alias for 'eza' command with options for long listing, git status, header, grouping, and long-ISO time format
-alias la='eza --long --git --all --header --group --time-style=long-iso'  # Alias for 'eza' command with options for long listing, git status, all files, header, grouping, and long-ISO time format
-alias l.='eza --long --git --header --group --time-style=long-iso .'  # Alias for 'eza' command with options for long listing, git status, header, grouping, long-ISO time format, and current directory
-alias lsr='eza --long --git --header --group --time-style=long-iso --recurse'  # Alias for 'eza' command with options for long listing, git status, header, grouping, long-ISO time format, and recursive listing
-
-# Tmux aliases
+# --- Tmux (terminal multiplexer) ---
 if [[ -x "$(command -v tmux)" ]]; then
-  # Basic tmux commands
-  alias tm="tmux"                    # Alias for 'tmux'
-  alias tmc="nvim ~/.tmux.conf"        # Alias for 'nv ~/.tmux.conf' (edit the tmux configuration file)
-  alias tmka="tmux kill-session"     # Alias for 'tmux kill-session' (kill the current tmux session)
-  alias tmk="tmux kill-session -t $1" # Alias for 'tmux kill-session -t $1' (kill the specified tmux session)
-  alias tma="tmux attach -t $1"      # Alias for 'tmux attach -t $1' (attach to the specified tmux session)
-  alias tmn="tmux new -s $1"         # Alias for 'tmux new -s $1' (create a new tmux session with the specified name)
-  alias tml="tmux list-sessions"     # Alias for 'tmux list-sessions' (list all tmux sessions)
+  alias tm="tmux"
+  alias tmc="nvim ~/.tmux.conf"       # Edit tmux config
+  alias tmka="tmux kill-session"      # Kill current session
+  alias tml="tmux list-sessions"      # List all sessions
+  tmk() { tmux kill-session -t "$1"; }  # Kill named session
+  tma() { tmux attach -t "$1"; }        # Attach to named session
+  tmn() { tmux new -s "$1"; }           # Create new named session
 fi
 
-export PATH="$HOME/.local/bin/:$HOME/.config/nvim:$HOME/.cargo/bin:$HOME/go/bin/:$PATH"
-eval "$(zoxide init --cmd cd zsh)"
+# --- Git ---
+if [[ -x "$(command -v git)" ]]; then
+  # Basic commands
+  alias g='git'
+  alias ga='git add'
+  alias gc='git commit'
+  alias gcm='git commit -m'
+  alias gd='git diff'
+  alias gds='git diff --staged'
+  alias gl='git log'
+  alias gpl='git pull'
+  alias gps='git push'
+  alias gpf='git push --force-with-lease'  # Safe force push
+  alias gr='git remote'
+  alias grv='git remote -v'
+  alias gs='git status'
 
-if [[ -f "/opt/homebrew/bin/brew" ]] then
-  # If you're using macOS, you'll want this enabled
+  # Branch commands
+  alias gb='git branch'
+  alias gba='git branch -a'            # All branches (local + remote)
+  alias gbd='git branch -d'            # Delete branch (safe)
+  alias gbD='git branch -D'            # Delete branch (force)
+  alias gbm='git branch -m'            # Rename branch
+  alias gbn='git branch --no-merged'   # Branches not yet merged
+  alias gbo='git branch --remote --verbose'
+  alias gbs='git show-branch'
+
+  # Other commands
+  alias gch='git cherry'
+  alias gcl='git clone'
+  alias gco='git checkout'
+  alias gcp='git cherry-pick'
+  alias gcv='git covert'
+  alias gdt='git difftool'
+  alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --date=relative'
+fi
+
+
+# ============================================================================
+# 5. TOOL INITIALISATIONS
+# ============================================================================
+
+# Zoxide - smarter cd command (tracks frequently used directories)
+# Usage: cd <partial-path> will jump to most frequently used match
+(( $+commands[zoxide] )) && eval "$(zoxide init --cmd cd zsh)"
+
+# Homebrew shell environment (sets up brew paths and environment)
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-source <(fzf --zsh)
+# FZF - fuzzy finder integration
+# Enables Ctrl+R for history search, Ctrl+T for file search
+(( $+commands[fzf] )) && source <(fzf --zsh)
 
-# Set the directory we want to store zinit and plugins
+
+# ============================================================================
+# 6. PLUGIN MANAGER (ZINIT) & PLUGINS
+# ============================================================================
+
+# Zinit installation directory
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
-# Download Zinit, if it's not there yet
+# Auto-install Zinit if not present
 if [ ! -d "$ZINIT_HOME" ]; then
    mkdir -p "$(dirname $ZINIT_HOME)"
    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 
-# Source/Load zinit
+# Load Zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
-# Add in Powerlevel10k
+# --- Theme ---
+# Powerlevel10k - fast, flexible prompt theme
 zinit ice depth=1; zinit light romkatv/powerlevel10k
 
-# Add in zsh plugins
-zinit light zsh-users/zsh-syntax-highlighting
-zinit light zsh-users/zsh-completions
-zinit light zsh-users/zsh-autosuggestions
+# --- Plugins ---
+zinit light zsh-users/zsh-syntax-highlighting  # Command syntax highlighting
+zinit light zsh-users/zsh-completions          # Additional completions
+zinit light zsh-users/zsh-autosuggestions      # Fish-like autosuggestions
+zinit light Aloxaf/fzf-tab                     # FZF-powered tab completion
 
-# make sure to brew install fzf
-zinit light Aloxaf/fzf-tab
-
-# Add in snippets
+# --- Oh-My-Zsh Snippets ---
+# These provide additional aliases and completions from Oh-My-Zsh
 zinit snippet OMZP::git
-zinit snippet OMZP::sudo
-zinit snippet OMZP::archlinux
+zinit snippet OMZP::sudo              # Press ESC twice to add sudo
 zinit snippet OMZP::aws
-zinit snippet OMZP::kubectl
+# zinit snippet OMZP::kubectl  # Disabled: using custom lazy-load setup instead (see Kubernetes section)
 zinit snippet OMZP::kubectx
-zinit snippet OMZP::command-not-found
+zinit snippet OMZP::command-not-found # Suggests package to install for unknown commands
 
-# Add zsh-completions to fpath
-fpath+=("${ZINIT_HOME}/plugins/zsh-users---zsh-completions/src")
+# Add all completion directories to fpath BEFORE compinit
+fpath+=(
+  "${ZINIT_HOME}/plugins/zsh-users---zsh-completions/src"
+  ~/.zfunc
+  ~/.docker/completions
+)
 
-# Load completions
-# autoload -Uz compinit && compinit -u
-autoload -Uz compinit && compinit -v
+# Initialise completion system (after all fpath additions)
+# -C flag uses cached completions (regenerate with: rm ~/.zcompdump && compinit)
+compinit -C
 
-# Enable menu selection for completions
-zstyle ':completion:*' menu select
 
-# Keybindings
-bindkey -e
-bindkey '^p' history-search-backward
-bindkey '^n' history-search-forward
-bindkey '^[w' kill-region
+# ============================================================================
+# 7. SHELL OPTIONS
+# ============================================================================
 
-function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
-}
+# --- Keybindings ---
+bindkey -e                          # Use Emacs-style keybindings
+bindkey '^p' history-search-backward  # Ctrl+P: search history backward
+bindkey '^n' history-search-forward   # Ctrl+N: search history forward
+bindkey '^[w' kill-region             # Alt+W: kill region
 
-# History
-HISTSIZE=10000
-HISTFILE=~/.zsh_history
-SAVEHIST=$HISTSIZE
-HISTDUP=erase
-setopt appendhistory
-setopt sharehistory
-setopt hist_ignore_space
-setopt hist_ignore_all_dups
-setopt hist_save_no_dups
-setopt hist_ignore_dups
-setopt hist_find_no_dups
+# --- History ---
+HISTSIZE=10000                      # Commands to keep in memory
+HISTFILE=~/.zsh_history             # History file location
+SAVEHIST=$HISTSIZE                  # Commands to save to file
+HISTDUP=erase                       # Erase duplicates
+setopt appendhistory                # Append to history file
+setopt sharehistory                 # Share history between sessions
+setopt hist_ignore_space            # Ignore commands starting with space
+setopt hist_ignore_all_dups         # Remove older duplicate entries
+setopt hist_save_no_dups            # Don't save duplicates
+setopt hist_ignore_dups             # Ignore consecutive duplicates
+setopt hist_find_no_dups            # Don't show duplicates when searching
 
-# Enable path expansion
-setopt AUTO_MENU
-setopt AUTO_LIST
-setopt AUTO_PARAM_SLASH
+# --- Completion Behaviour ---
+setopt AUTO_MENU                    # Show completion menu on tab
+setopt AUTO_LIST                    # List choices on ambiguous completion
+setopt AUTO_PARAM_SLASH             # Add trailing slash to directories
 
-# Completion styling
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' menu select
+# --- Completion Styling ---
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'  # Case-insensitive matching
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # Coloured completions
+zstyle ':completion:*' menu select                       # Menu selection
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
-# Replay zinit commands
+# Replay zinit completions (required after loading plugins)
 zinit cdreplay -q
 
 
-# Pure Settings
-# fpath+=($HOME/.zsh/pure)
-# autoload -U promptinit; promptinit
-# # optionally define some options
-# PURE_CMD_MAX_EXEC_TIME=10
-# # change the path color
-# zstyle :prompt:pure:path color white
-# # change the color for both `prompt:success` and `prompt:error`
-# zstyle ':prompt:pure:prompt:*' color cyan
-# # turn on git stash status
-# zstyle :prompt:pure:git:stash show yes
-# prompt pure
+# ============================================================================
+# 8. EXTERNAL TOOL INTEGRATIONS
+# ============================================================================
 
-# Git aliases
-if [[ -x "$(command -v git)" ]]; then
-  # Basic git commands
-  alias g='git'                # Alias for 'git'
-  alias ga='git add'           # Alias for 'git add' (stage changes)
-  alias gc='git commit'        # Alias for 'git commit' (commit changes)
-  alias gcm='git commit -m'    # Alias for 'git commit -m' (commit changes with a message)
-  alias gd='git diff'          # Alias for 'git diff' (show changes between commits)
-  alias gds='git diff --staged' # Alias for 'git diff --staged' (show changes between the staging area and the last commit)
-  alias gl='git log'           # Alias for 'git log' (show commit logs)
-  alias gpl='git pull'         # Alias for 'git pull' (fetch and merge changes from the remote repository)
-  alias gps='git push'         # Alias for 'git push' (push changes to the remote repository)
-  alias gpf='git push --force-with-lease' # Alias for 'git push' (push my changes, but only if the remote repository is in the same state as my last fetch)
-  alias gr='git remote'        # Alias for 'git remote' (manage set of tracked repositories)
-  alias grv='git remote -v'    # Alias for 'git remote -v' (list tracked repositories and their URLs)
-  alias gs='git status'        # Alias for 'git status' (show the status of changes)
-
-  # Branch commands
-  alias gb='git branch'        # Alias for 'git branch' (list branches)
-  alias gba='git branch -a'    # Alias for 'git branch -a' (list both remote-tracking and local branches)
-  alias gbd='git branch -d'    # Alias for 'git branch -d' (delete branch)
-  alias gbD='git branch -D'    # Alias for 'git branch -D' (force delete branch)
-  alias gbm='git branch -m'    # Alias for 'git branch -m' (rename branch)
-  alias gbn='git branch --no-merged' # Alias for 'git branch --no-merged' (list branches not yet merged into the specified branch)
-  alias gbo='git branch --remote --verbose' # Alias for 'git branch --remote --verbose' (list remote branches)
-  alias gbs='git show-branch'  # Alias for 'git show-branch' (show branch labels and their commits)
-
-  # Commit history commands
-  alias gch='git cherry'       # Alias for 'git cherry' (compare two branches and list the commits that are not on both)
-  alias gcl='git clone'        # Alias for 'git clone' (clone a repository)
-  alias gco='git checkout'     # Alias for 'git checkout' (switch branches or restore working tree files)
-  alias gcp='git cherry-pick'  # Alias for 'git cherry-pick' (apply changes introduced by some existing commits)
-  alias gcv='git covert'       # Alias for 'git covert' (manage remote-tracking branches)
-  alias gdt='git difftool'     # Alias for 'git difftool' (show changes between commits using external diff tools)
-  alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --date=relative' # Alias for a colored, decorated, graph log with
-fi
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+# Powerlevel10k configuration
+# Run `p10k configure` to customise, or edit ~/.p10k.zsh directly
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Rust/Cargo environment
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
+
+# Modular/Mojo shell completions
+(( $+commands[magic] )) && eval "$(magic completion --shell zsh)"
+
+# 1Password CLI plugins (SSH agent, etc.)
+[[ -f ~/.config/op/plugins.sh ]] && source ~/.config/op/plugins.sh
+
+# iTerm2 shell integration (enables features like cmd+click to open files)
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+
+# WasmEdge runtime environment
+[[ -f "$HOME/.wasmedge/env" ]] && source "$HOME/.wasmedge/env"
+
+# UV (Python package manager) shell completions
+(( $+commands[uv] )) && eval "$(uv generate-shell-completion zsh)"
+(( $+commands[uvx] )) && eval "$(uvx --generate-shell-completion zsh)"
+
+# Custom UV completion: autocomplete .py files for `uv run`
+if (( $+commands[uv] )); then
+  _uv_run_mod() {
+    if [[ "$words[2]" == "run" && "$words[CURRENT]" != -* ]]; then
+      _arguments '*:filename:_files -g "*.py"'
+    else
+      _uv "$@"
+    fi
+  }
+  compdef _uv_run_mod uv
+fi

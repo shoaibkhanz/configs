@@ -1,0 +1,45 @@
+/* coding-theme.css */
+
+/* Set monospace font globally */
+:root {
+  --marimo-monospace-font: 'Fira Code', Consolas, 'Courier New', monospace;
+  --marimo-text-font: 'Inter', sans-serif;
+  --marimo-heading-font: 'Inter', sans-serif;
+}
+
+/* Dark-code-like backgrounds for code cells */
+[data-cell-role='input'] {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: var(--marimo-monospace-font);
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+/* Markdown paragraphs more readable */
+.paragraph {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Output cells with subtle light shade */
+[data-cell-role='output'] {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  font-family: var(--marimo-monospace-font);
+  padding: 8px;
+  border-left: 3px solid #007acc;
+}
+
+/* Code font ligatures if supported */
+code {
+  font-variant-ligatures: contextual;
+}
+
+/* Optional: Named cell highlight */
+[data-cell-name='example_cell'] {
+  border: 2px dashed #ff9900;
+}
+
+/* Force dark mode if desired via script metadata */
