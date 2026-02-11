@@ -105,6 +105,8 @@ outer.right =      5
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
 alt-slash = 'layout tiles horizontal vertical'
 alt-comma = 'layout accordion horizontal vertical'
+alt-ctrl-f = 'layout tiling'
+alt-ctrl-shift-f = 'layout floating'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
 alt-h = 'focus left'
@@ -176,11 +178,11 @@ run = 'layout tiling'
 # System Settings / System Preferences
 [[on-window-detected]]
 if.app-id = 'com.apple.systempreferences'
-run = 'layout floating'
+run = 'layout tiling'
 
 [[on-window-detected]]
 if.app-id = 'com.apple.systemsettings'
-run = 'layout floating'
+run = 'layout tiling'
 
 # Common VPN clients - add your work VPN app-id here
 # Run `aerospace list-apps` while VPN is open to find the exact ID
@@ -210,17 +212,17 @@ run = 'layout floating'
 # Activity Monitor
 [[on-window-detected]]
 if.app-id = 'com.apple.ActivityMonitor'
-run = 'layout floating'
+run = 'layout tiling'
 
 # App Store
 [[on-window-detected]]
 if.app-id = 'com.apple.AppStore'
-run = 'layout floating'
+run = 'layout tiling'
 
 # Preview (for quick viewing)
 [[on-window-detected]]
 if.app-id = 'com.apple.Preview'
-run = 'layout floating'
+run = 'layout tiling'
 
 # 1Password and other password managers
 [[on-window-detected]]
@@ -234,6 +236,51 @@ run = 'layout floating'
 # Zoom - meeting controls should float
 [[on-window-detected]]
 if.app-id = 'us.zoom.xos'
+run = 'layout floating'
+
+# Utility / menu-bar style apps that are better as floating windows
+[[on-window-detected]]
+if.app-id = 'com.raycast.macos'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'me.damir.dropover-mac'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.devuap.beautyshotapp'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'net.rafaelconde.Hand-Mirror'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'leits.MeetingBar'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'org.herf.Flux'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.if.Amphetamine'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.imagestudiopro.ScreenBrush'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.pais.handy'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.superultra.Homerow'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.example.keyviz'
 run = 'layout floating'
 
 # ============================================
