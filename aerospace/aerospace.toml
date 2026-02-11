@@ -50,7 +50,7 @@ on-focus-changed = 'move-mouse window-lazy-center'
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
 # Also see: https://nikitabobko.github.io/AeroSpace/goodness#disable-hide-app
-automatically-unhide-macos-hidden-apps = false
+automatically-unhide-macos-hidden-apps = true
 
 # Possible values: (qwery|dvorak)
 # See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
@@ -111,6 +111,8 @@ alt-h = 'focus left'
 alt-j = 'focus down'
 alt-k = 'focus up'
 alt-l = 'focus right'
+alt-period = 'focus --boundaries-action wrap-around-the-workspace dfs-next'
+alt-shift-period = 'focus --boundaries-action wrap-around-the-workspace dfs-prev'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 alt-shift-h = 'move left'
@@ -169,7 +171,7 @@ alt-shift-l = ['join-with right', 'mode main']
 # Finder - has many window types (dialogs, Quick Look, etc.) that break tiling
 [[on-window-detected]]
 if.app-id = 'com.apple.finder'
-run = 'layout floating'
+run = 'layout tiling'
 
 # System Settings / System Preferences
 [[on-window-detected]]
