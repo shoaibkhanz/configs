@@ -18,6 +18,10 @@ show_agent_labels_on_pane_borders = true
 # Most reliable bindings are plain keys, ctrl+letter, esc/tab/enter, and function keys.
 # alt+..., cmd/super, and punctuation-with-modifiers may depend on your terminal/tmux setup.
 prefix = "ctrl+s"
-previous_tab = "["       # optional, unset by default
-next_tab = "]"           # optional, unset by default
-rename_tab = "e"         # optional, unset by default
+# Override defaults (prefix+p / prefix+n / prefix+shift+t) for tmux-style tab nav.
+previous_tab = "prefix+["
+next_tab = "prefix+]"
+rename_tab = "prefix+shift+e"
+# copy_mode default is prefix+[, which collides with previous_tab above.
+# Move it to prefix+y so it isn't silently disabled (warned in herdr-client.log).
+copy_mode = "prefix+y"
