@@ -1,5 +1,11 @@
 # configs
 
+> ⚠️ **Archived — no longer maintained.** All of these configs now live in
+> **[macos-dev-bootstrap](https://github.com/shoaibkhanz/macos-dev-bootstrap)**,
+> the single source of truth (it's what's symlinked live on the machine and it
+> ships the `install.sh` bootstrap). This repo is kept read-only for
+> reference/history. Use macos-dev-bootstrap for the current versions.
+
 Personal configuration files for macOS development environment.
 
 Paired with [macos-dev-bootstrap](https://github.com/shoaibkhanz/macos-dev-bootstrap) which automates installation and symlinking on a fresh machine.
